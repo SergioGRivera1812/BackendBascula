@@ -1,89 +1,84 @@
-// api-bascula/src/controllers/usuarioController.js
+import bcrypt from "bcrypt";
+import { Usuario } from "../models/Usuario.js";
 
-// ⚠️ SIMULACIÓN DE DATOS (En memoria) ⚠️
-let usuarios = [];
-let proximoIdUsuario = 1;
+export const usuarioController = {
+    // Crear
+    async crear(req, res) {
+        try {
+            const { nombre, usuario, password, rol } = req.body;
+            const passwordHash = await bcrypt.hash(password, 10);
+            await Usuario.crear(nombre, usuario, passwordHash, rol);
+            res.json({ message: "Usuario creado correctamente" });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    },
 
-// POST: Crear nuevo usuario (Alta)
-exports.crearUsuario = (req, res) => {
-    const { usuario, contrasena } = req.body; 
+    // Leer todos
+    async obtenerTodos(req, res) {
+        try {
+            const datos = await Usuario.obtenerTodos();
+            res.json(datos);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    },
 
-    if (!usuario || !contrasena) {
-        return res.status(400).json({ error: 'Faltan campos: usuario y contrasena son requeridos.' });
+    // Leer uno
+    async obtenerUno(req, res) {
+        try {
+            const id = req.params.id;
+            const dato = await Usuario.obtenerUno(id);
+            if (!dato) return res.status(404).json({ message: "Usuario no encontrado" });
+            res.json(dato);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    },
+
+    // Actualizar
+    async actualizar(req, res) {
+        try {
+            const id = req.params.id;
+            const { nombre, usuario, password, rol } = req.body;
+            const passwordHash = password ? await bcrypt.hash(password, 10) : undefined;
+            await Usuario.actualizar(id, { nombre, usuario, password: passwordHash, rol });
+            res.json({ message: "Usuario actualizado correctamente" });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    },
+
+    // Eliminar
+    async eliminar(req, res) {
+        try {
+            const id = req.params.id;
+            await Usuario.eliminar(id);
+            res.json({ message: "Usuario eliminado correctamente" });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    },
+
+    // LOGIN
+    async login(req, res) {
+        try {
+            const { usuario, password } = req.body;
+            const user = await Usuario.obtenerPorUsuario(usuario);
+
+            if (!user) {
+                return res.status(404).json({ message: "Usuario no encontrado" });
+            }
+
+            const esValido = await bcrypt.compare(password, user.password);
+            if (!esValido) {
+                return res.status(401).json({ message: "Contraseña incorrecta" });
+            }
+
+            // Opcional: podrías generar un token JWT aquí si quieres
+            res.json({ message: "Login exitoso", usuario: { id: user.id, nombre: user.nombre, rol: user.rol } });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
     }
-    
-    // Simulación: En un entorno real, aquí iría el hash de la contraseña.
-    const nuevoUsuario = { 
-        id: proximoIdUsuario++, 
-        usuario, 
-        contrasena 
-    }; 
-    
-    usuarios.push(nuevoUsuario);
-    res.status(201).json({ 
-        mensaje: 'Usuario registrado con éxito', 
-        usuario: { id: nuevoUsuario.id, usuario: nuevoUsuario.usuario } 
-    });
-};
-
-// GET: Obtener todos los usuarios (Lectura)
-exports.obtenerUsuarios = (req, res) => {
-    // En DB real: 'await Usuario.findAll()'
-    res.status(200).json(usuarios);
-};
-
-// GET: Buscar usuario por ID (Lectura por ID)
-exports.obtenerUsuarioPorId = (req, res) => {
-    // El ID viene de la URL, es un string, lo convertimos a número
-    const id = parseInt(req.params.id); 
-    const usuarioEncontrado = usuarios.find(u => u.id === id);
-
-    if (!usuarioEncontrado) {
-        return res.status(404).json({ error: `Usuario con ID ${id} no encontrado.` });
-    }
-    
-    // Se excluye la contraseña en la respuesta
-    const { contrasena, ...usuarioLimpio } = usuarioEncontrado; 
-    res.status(200).json(usuarioLimpio);
-};
-
-// PUT: Actualizar usuario (Modificación)
-exports.actualizarUsuario = (req, res) => {
-    const id = parseInt(req.params.id); 
-    const { usuario, contrasena } = req.body; 
-    const index = usuarios.findIndex(u => u.id === id);
-
-    if (index === -1) {
-        return res.status(404).json({ error: `Usuario con ID ${id} no encontrado.` });
-    }
-
-    if (!usuario && !contrasena) {
-        return res.status(400).json({ error: 'Debe proporcionar al menos el nuevo usuario o contraseña.' });
-    }
-
-    // Actualizamos solo los campos que vienen en el body
-    if (usuario) usuarios[index].usuario = usuario;
-    if (contrasena) usuarios[index].contrasena = contrasena; // En un entorno real, aquí se hashearía la nueva contraseña.
-
-    // En DB real: 'await Usuario.update({ ... })'
-    res.status(200).json({ 
-        mensaje: `Usuario con ID ${id} actualizado con éxito.`, 
-        usuario: { id: usuarios[index].id, usuario: usuarios[index].usuario } 
-    });
-};
-
-// DELETE: Eliminar usuario (Baja / Eliminación)
-exports.eliminarUsuario = (req, res) => {
-    const id = parseInt(req.params.id);
-    const index = usuarios.findIndex(u => u.id === id);
-
-    if (index === -1) {
-        return res.status(404).json({ error: `Usuario con ID ${id} no encontrado.` });
-    }
-
-    // Eliminamos el elemento del arreglo
-    usuarios.splice(index, 1);
-    // En DB real: 'await Usuario.destroy({ where: { id: id } })'
-
-    res.status(200).json({ mensaje: `Usuario con ID ${id} eliminado con éxito.` });
 };

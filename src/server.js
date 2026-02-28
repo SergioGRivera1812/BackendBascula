@@ -1,49 +1,37 @@
-const express = require('express');
-const apiRoutes = require('./routes/apiRoutes');
-// const db = require('./config/db'); // Esta línea se usará más adelante para la conexión a MySQL
+import express from "express";
+import cors from "cors";
+
+// Importar todas las rutas
+import usuarioRoutes from "./routes/usuarioRoutes.js";
+import camionRoutes from "./routes/camionRoutes.js";
+import choferRoutes from "./routes/choferRoutes.js";
+import materialRoutes from "./routes/materialRoutes.js";
+//import proveedorRoutes from "./routes/proveedorRoutes.js";
+import entradaRoutes from "./routes/entradaRoutes.js";
+import salidaRoutes from "./routes/salidaRoutes.js";
 
 const app = express();
-const PORT = 3000; // Puedes cambiar el puerto si lo deseas
 
+// Middleware
+app.use(cors());
 app.use(express.json());
 
-/*
-const cors = require('cors');
-app.use(cors({
-    origin: 'http://localhost:4200' // Reemplaza con la URL de tu frontend de Angular si es diferente
-}));
-*/
+// Rutas
+app.use("/api/usuarios", usuarioRoutes);
+app.use("/api/camiones", camionRoutes);
+app.use("/api/choferes", choferRoutes);
+app.use("/api/materiales", materialRoutes);
+//app.use("/api/proveedores", proveedorRoutes);
+app.use("/api/entrada", entradaRoutes);
+app.use("/api/salida", salidaRoutes);
 
-const routerBase = express.Router();
-routerBase.use('/v1', apiRoutes);
-app.use('/api', routerBase);
-
-
-console.log('📋 Rutas disponibles en la API:');
-apiRoutes.stack.forEach((r) => {
-    if (r.route && r.route.path) {
-        const method = Object.keys(r.route.methods)[0].toUpperCase();
-        console.log(`   ${method} http://localhost:${PORT}/api/v1${r.route.path}`);
-    }
+// Ruta de prueba
+app.get("/", (req, res) => {
+    res.send("API del sistema de báscula corriendo correctamente");
 });
 
-
-app.use((req, res, next) => {
-    res.status(404).json({ 
-        error: 'Ruta no encontrada.',
-        mensaje: `La URL ${req.originalUrl} no existe en este servidor.`
-    });
-});
-
-
+// Puerto de escucha
+const PORT = 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor de Báscula corriendo en http://localhost:${PORT}`);
-    console.log('✅ Los módulos CRUD y la lógica de Transacciones están cargados.');
-    
-    // Al integrar MySQL (próximo paso), aquí iría la prueba de conexión a la base de datos:
-    /*
-    db.authenticate()
-      .then(() => console.log('✅ Conexión a MySQL establecida.'))
-      .catch(err => console.error('❌ Error al conectar a la DB:', err));
-    */
+    console.log(`Servidor backend corriendo en http://localhost:${PORT}`);
 });
