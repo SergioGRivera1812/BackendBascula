@@ -49,6 +49,15 @@ export const EntradaBascula = {
         return db.query("DELETE FROM entrada_bascula WHERE id = ?", [id]);
     },
 
+    // Obtener una entrada por su código (la más reciente). Usado por la salida para leer la tara.
+    async obtenerPorCodigo(codigoEntrada) {
+        const [rows] = await db.query(
+            "SELECT * FROM entrada_bascula WHERE codigoEntrada = ? ORDER BY fecha_entrada DESC LIMIT 1",
+            [codigoEntrada]
+        );
+        return rows[0];
+    },
+
     // Marcar salida de una entrada (activo = 0)
     async marcarSalida(codigoEntrada) {
         return db.query("UPDATE entrada_bascula SET activo = 0 WHERE codigoEntrada = ?", [codigoEntrada]);

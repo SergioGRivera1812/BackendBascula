@@ -5,8 +5,24 @@ export const salidaController = {
     // Crear salida
     async crear(req, res) {
         try {
-            const { codigoEntrada, bruto, tara } = req.body;
-            const neto = bruto - tara;
+            const { codigoEntrada } = req.body;
+            const bruto = Number(req.body.bruto);
+
+            // Validaciones de entrada (evitan que un NaN llegue a la base de datos)
+            if (codigoEntrada === undefined || codigoEntrada === null) {
+                return res.status(400).json({ message: "Falta 'codigoEntrada'" });
+            }
+            if (Number.isNaN(bruto)) {
+                return res.status(400).json({ message: "'bruto' debe ser un número válido" });
+            }
+
+            // La tara se toma de la entrada correspondiente (única fuente de verdad)
+            const entrada = await EntradaBascula.obtenerPorCodigo(codigoEntrada);
+            if (!entrada) {
+                return res.status(404).json({ message: "No existe una entrada con ese código" });
+            }
+
+            const neto = bruto - Number(entrada.tara);
 
             await SalidaBascula.crear({ codigoEntrada, bruto, neto });
 
