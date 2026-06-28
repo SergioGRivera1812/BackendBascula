@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 
+// Middleware de autenticación
+import { verificarToken } from "./middlewares/auth.js";
+
 // Importar todas las rutas
 import usuarioRoutes from "./routes/usuarioRoutes.js";
 import camionRoutes from "./routes/camionRoutes.js";
@@ -60,14 +63,17 @@ app.use((req, res, next) => {
 });
 
 // Rutas
+// Usuarios maneja su propia protección internamente (login público, resto protegido).
 app.use("/api/usuarios", usuarioRoutes);
-app.use("/api/camiones", camionRoutes);
-app.use("/api/choferes", choferRoutes);
-app.use("/api/materiales", materialRoutes);
-app.use("/api/proveedores", proveedorRoutes);
-app.use("/api/entrada", entradaRoutes);
-app.use("/api/salida", salidaRoutes);
-app.use("/api/transacciones", transaccionRoutes);
+
+// El resto de recursos requieren token JWT válido en todas sus rutas.
+app.use("/api/camiones", verificarToken, camionRoutes);
+app.use("/api/choferes", verificarToken, choferRoutes);
+app.use("/api/materiales", verificarToken, materialRoutes);
+app.use("/api/proveedores", verificarToken, proveedorRoutes);
+app.use("/api/entrada", verificarToken, entradaRoutes);
+app.use("/api/salida", verificarToken, salidaRoutes);
+app.use("/api/transacciones", verificarToken, transaccionRoutes);
 
 // Ruta de prueba
 app.get("/", (req, res) => {

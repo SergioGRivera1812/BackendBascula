@@ -19,6 +19,12 @@ export const Usuario = {
         return rows[0];
     },
 
+    // Usado por el login: incluye el password (hash) para poder comparar con bcrypt
+    async obtenerPorUsuario(usuario) {
+        const [rows] = await db.query("SELECT id, nombre, usuario, password, rol FROM usuarios WHERE usuario = ?", [usuario]);
+        return rows[0];
+    },
+
     async actualizar(id, datos) {
         const fields = [];
         const values = [];

@@ -1,12 +1,5 @@
+import "./env.js";
 import mysql from "mysql2/promise";
-
-// Carga las variables del archivo .env si existe (Node 20.12+).
-// Si no existe, se usan los valores por defecto y la app sigue funcionando.
-try {
-    process.loadEnvFile();
-} catch {
-    // No hay archivo .env: se usan los fallbacks de abajo.
-}
 
 // Configuración de la conexión (lee de variables de entorno con valores por defecto)
 export const db = await mysql.createPool({

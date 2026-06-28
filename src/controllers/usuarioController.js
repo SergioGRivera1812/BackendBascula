@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import { Usuario } from "../models/Usuario.js";
+import { generarToken } from "../config/jwt.js";
 
 export const usuarioController = {
     // Crear
@@ -75,8 +76,14 @@ export const usuarioController = {
                 return res.status(401).json({ message: "Contraseña incorrecta" });
             }
 
-            // Opcional: podrías generar un token JWT aquí si quieres
-            res.json({ message: "Login exitoso", usuario: { id: user.id, nombre: user.nombre, rol: user.rol } });
+            // Genera el token JWT con los datos esenciales del usuario
+            const token = generarToken({ id: user.id, usuario: user.usuario, rol: user.rol });
+
+            res.json({
+                message: "Login exitoso",
+                token,
+                usuario: { id: user.id, nombre: user.nombre, rol: user.rol }
+            });
         } catch (error) {
             res.status(500).json({ error: error.message });
         }
