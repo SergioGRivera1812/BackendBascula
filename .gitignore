@@ -1,0 +1,27 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno (credenciales, secretos)
+.env
+.env.local
+.env.*.local
+
+# Documentación local (no se sube al repo)
+ENDPOINTS.md
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Herramientas / cachés de tooling
+.atl/
+
+# Editores
+.vscode/
+.idea/
+*.swp

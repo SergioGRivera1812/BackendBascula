@@ -9,6 +9,7 @@ import materialRoutes from "./routes/materialRoutes.js";
 import proveedorRoutes from "./routes/proveedorRoutes.js";
 import entradaRoutes from "./routes/entradaRoutes.js";
 import salidaRoutes from "./routes/salidaRoutes.js";
+import transaccionRoutes from "./routes/transaccionRoutes.js";
 
 const app = express();
 
@@ -66,6 +67,7 @@ app.use("/api/materiales", materialRoutes);
 app.use("/api/proveedores", proveedorRoutes);
 app.use("/api/entrada", entradaRoutes);
 app.use("/api/salida", salidaRoutes);
+app.use("/api/transacciones", transaccionRoutes);
 
 // Ruta de prueba
 app.get("/", (req, res) => {
